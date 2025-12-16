@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Portfolio</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Courier+Prime:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000000;
+            color: #00ff00;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Grid Background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* CRT Scanlines */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            animation: scanline 8s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+
+        /* CRT Noise */
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 998;
+            opacity: 0.05;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" /></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="1"/></svg>');
+            animation: noise 0.2s infinite;
+        }
+
+        @keyframes noise {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-5%, -5%); }
+            20% { transform: translate(-10%, 5%); }
+            30% { transform: translate(5%, -10%); }
+            40% { transform: translate(-5%, 15%); }
+            50% { transform: translate(-10%, 5%); }
+            60% { transform: translate(15%, 0); }
+            70% { transform: translate(0, 10%); }
+            80% { transform: translate(-15%, 0); }
+            90% { transform: translate(10%, 5%); }
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Pixel Border */
+        .pixel-border {
+            border: 3px solid;
+            border-image: repeating-linear-gradient(
+                90deg,
+                #ff00ff 0px, #ff00ff 10px,
+                #00ffff 10px, #00ffff 20px,
+                #ffff00 20px, #ffff00 30px
+            ) 3;
+            padding: 20px;
+            margin-bottom: 20px;
+            animation: border-glow 2s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        @keyframes border-glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        /* Glitch Text */
+        .glitch {
+            font-size: 48px;
+            font-weight: bold;
+            text-transform: uppercase;
+            position: relative;
+            display: inline-block;
+            color: #00ffff;
+            animation: glitch-skew 1s infinite;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #00ff00;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(10px, 9999px, 31px, 0); }
+            20% { clip: rect(85px, 9999px, 140px, 0); }
+            40% { clip: rect(20px, 9999px, 65px, 0); }
+            60% { clip: rect(54px, 9999px, 90px, 0); }
+            80% { clip: rect(2px, 9999px, 33px, 0); }
+            100% { clip: rect(60px, 9999px, 85px, 0); }
+        }
+
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 119px, 0); }
+            20% { clip: rect(29px, 9999px, 94px, 0); }
+            40% { clip: rect(73px, 9999px, 131px, 0); }
+            60% { clip: rect(17px, 9999px, 74px, 0); }
+            80% { clip: rect(96px, 9999px, 126px, 0); }
+            100% { clip: rect(42px, 9999px, 98px, 0); }
+        }
+
+        @keyframes glitch-skew {
+            0% { transform: skew(0deg); }
+            10% { transform: skew(-2deg); }
+            20% { transform: skew(2deg); }
+            30% { transform: skew(-1deg); }
+            40% { transform: skew(1deg); }
+            50% { transform: skew(0deg); }
+            100% { transform: skew(0deg); }
+        }
+
+        /* ASCII Divider */
+        .ascii-divider {
+            color: #ff0066;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 14px;
+            letter-spacing: 2px;
+            animation: rainbow 3s linear infinite;
+        }
+
+        @keyframes rainbow {
+            0% { color: #ff0066; }
+            16% { color: #ff6600; }
+            33% { color: #ffff00; }
+            50% { color: #00ff00; }
+            66% { color: #00ffff; }
+            83% { color: #ff00ff; }
+            100% { color: #ff0066; }
+        }
+
+        /* Terminal typing effect */
+        .terminal-intro {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .terminal-intro.active {
+            display: flex;
+        }
+
+        .terminal-text {
+            color: #00ff00;
+            font-size: 24px;
+            white-space: pre-wrap;
+            text-align: left;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background: #00ff00;
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Content styles */
+        .highlight {
+            color: #ff00ff;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+
+        .highlight-cyan {
+            color: #00ffff;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        .highlight-yellow {
+            color: #ffff00;
+            text-shadow: 0 0 5px #ffff00;
+        }
+
+        .highlight-red {
+            color: #ff0066;
+            text-shadow: 0 0 5px #ff0066;
+        }
+
+        .section {
+            margin: 30px 0;
+            line-height: 1.8;
+        }
+
+        .section-title {
+            font-size: 28px;
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        li::before {
+            content: "▸ ";
+            color: #ff00ff;
+        }
+
+        a {
+            color: #00ffff;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        a:hover {
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+
+        .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .link-item {
+            padding: 8px 15px;
+            border: 2px solid #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .link-item:hover {
+            background: rgba(255, 0, 255, 0.2);
+            border-color: #ff00ff;
+            transform: translateY(-2px);
+        }
+
+        /* Hologram Image Styles */
+        .hologram-container {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            flex-shrink: 0;
+        }
+
+        .hologram-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: none;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.3),
+                0 0 40px rgba(0, 255, 255, 0.2);
+            filter: 
+                saturate(1.5) 
+                contrast(1.2) 
+                brightness(1.1);
+            animation: hologram-flicker 3s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hologram-scan {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(0, 255, 255, 0.3) 50%,
+                transparent 100%
+            );
+            animation: scan-down 2s linear infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        @keyframes hologram-flicker {
+            0%, 100% {
+                opacity: 1;
+                filter: saturate(1.5) contrast(1.2) brightness(1.1);
+            }
+            50% {
+                opacity: 0.95;
+                filter: saturate(1.8) contrast(1.3) brightness(1.2);
+            }
+            75% {
+                opacity: 0.98;
+            }
+        }
+
+        @keyframes scan-down {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(200%);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hologram-container {
+                width: 200px;
+                height: 200px;
+                margin: 20px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Terminal Intro -->
+    <div class="terminal-intro active" id="terminalIntro">
+        <div class="terminal-text" id="terminalText"></div>
+        <span class="cursor"></span>
+    </div>
+
+    <!-- Grid Background -->
+    <canvas class="grid-bg" id="gridCanvas"></canvas>
+
+    <!-- CRT Effects -->
+    <div class="scanlines"></div>
+    <div class="noise"></div>
+
+    <!-- Main Content -->
+    <div class="container" id="mainContent" style="display: none;">
+        <div class="pixel-border">
+            <div style="display: flex; align-items: center; gap: 30px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h1 class="glitch" data-text="[SYSTEM ONLINE]">[SYSTEM ONLINE]</h1>
+                    <p style="margin-top: 20px;">
+                        <span class="highlight">My Name:</span> <span class="highlight-cyan">Zak (A R Zakaria Talukdar)</span><br>
+                        Here's my only fixed address: <span class="highlight-yellow">zakariatalukdar123@gmail.com</span><br>
+                        <span class="highlight-red">Aspiring Cybersecurity & Embedded Systems Engineer</span><br>
+                        Final-year B.Tech CSE student. I work on <span class="highlight">cybersecurity</span>, 
+                        <span class="highlight-cyan">OS & kernel tinkering</span>, 
+                        <span class="highlight-yellow">embedded systems</span> from phone motherboards, 
+                        and small tooling for <span class="highlight-red">pentesting</span> and 
+                        <span class="highlight">network security</span>.
+                    </p>
+                </div>
+                <div class="hologram-container">
+                    <img src="your-holographic-image.png" alt="Holographic Profile" class="hologram-image">
+                    <div class="hologram-scan"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ascii-divider">
+            ═══════════════════════════════════════════════════════════════
+        </div>
+
+        <div class="section">
+            <p>
+                &gt; currently exploring <span class="highlight-red">vulnerability research</span>, 
+                <span class="highlight-cyan">exploit dev</span>, and 
+                <span class="highlight-yellow">hardware-software integration</span>
+            </p>
+            <p style="margin-top: 10px;">
+                &gt; repurposing an <span class="highlight">Android motherboard</span> into a 
+                <span class="highlight-cyan">handheld gaming console</span> — driver support & performance tuning
+            </p>
+            <p style="margin-top: 10px;">
+                &gt; building <span class="highlight-yellow">kernel modules</span> and experimenting with 
+                <span class="highlight-red">OS internals</span>
+            </p>
+        </div>
+
+        <div class="ascii-divider">
+            ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+        </div>
+
+        <div class="section">
+            <div class="section-title">/// INTERESTS</div>
+            <p>
+                <span class="highlight-cyan">cybersecurity</span>, 
+                <span class="highlight-yellow">exploit development</span>, 
+                <span class="highlight">OS & kernel development</span>, 
+                <span class="highlight-red">embedded systems</span>, 
+                <span class="highlight-cyan">network security</span>, 
+                <span class="highlight-yellow">penetration testing</span>, 
+                <span class="highlight">reverse engineering</span>, 
+                <span class="highlight-red">hardware hacking</span>, 
+                <span class="highlight-cyan">low-level programming</span>
+            </p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">/// PURE HATE</div>
+            <p style="color: #ff0066;">
+                bloated software, forced authentication, closed-source surprises, 
+                Windows registry hell, proprietary vendor lock-in
+            </p>
+        </div>
+
+        <div class="ascii-divider">
+            ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+        </div>
+
+        <div class="section">
+            <p style="text-align: center; font-size: 20px;">↓ will update soon</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">* • TAKE A LOOK AT</div>
+            <ul>
+                <li><span class="highlight-cyan">DevDroid-ROM</span> — Custom AOSP ROM for integrated dev environment <a href="https://github.com/arrhenius975/Devdroid-ROM" target="_blank">[GitHub →]</a></li>
+                <li><span class="highlight-yellow">SQL-SMITH</span> — SQL query generator web app <a href="https://sql-smith.vercel.app" target="_blank">[Live Demo →]</a></li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <div class="section-title">* • MY LINKS</div>
+            <div class="links">
+                <a href="https://www.linkedin.com/in/a-r-zakaria-talukdar-635419257/" target="_blank" class="link-item">◦ linkedin</a>
+                <a href="https://github.com/arrhenius975" target="_blank" class="link-item">◦ github</a>
+                <a href="mailto:zakariatalukdar123@gmail.com" class="link-item">◦ email me ♡</a>
+            </div>
+        </div>
+
+        <div class="ascii-divider">
+            ═══════════════════════════════════════════════════════════════
+        </div>
+
+        <div class="section">
+            <div class="section-title">SKILLS & TOOLS</div>
+            <ul>
+                <li><span class="highlight">Languages:</span> C, C++, Python, Bash</li>
+                <li><span class="highlight-cyan">Systems:</span> Linux (kernel/devices), AOSP/Android, embedded Linux</li>
+                <li><span class="highlight-yellow">Networking & Security:</span> TCP/IP, Nmap, Wireshark, basic exploit development, pentesting tooling</li>
+                <li><span class="highlight-red">Reverse Engineering:</span> GDB, x86/x64/ARM assembly</li>
+                <li><span class="highlight">Tools:</span> git, buildroot/AOSP build system, cross-compilation toolchains</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <div class="section-title">SELECTED PROJECTS</div>
+            <ul>
+                <li><span class="highlight-cyan">DevDroid-ROM</span> — Custom AOSP-based ROM focused on secure, integrated development environment for Android devices <a href="https://github.com/arrhenius975/Devdroid-ROM" target="_blank">[GitHub]</a></li>
+                <li><span class="highlight-yellow">SQL-SMITH</span> — SQL query generator web app prototype <a href="https://sql-smith.vercel.app" target="_blank">[Live Demo]</a></li>
+                <li><span class="highlight-red">Android Motherboard Gaming Console</span> — Repurposing phone hardware into handheld console with custom drivers and performance tuning</li>
+                <li><span class="highlight">Network Scanner & Pentesting Tools</span> — Custom scripts for network scanning and vulnerability detection</li>
+                <li><span class="highlight-cyan">OS/Kernel Experiments</span> — Building kernel modules and exploring OS internals</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <div class="section-title">CERTIFICATIONS & LEARNING</div>
+            <ul>
+                <li>Full Networking & CCNA prep guidance by David (Udemy) — ongoing study</li>
+                <li>Continuous self-learning in vulnerability research and exploit development</li>
+            </ul>
+        </div>
+
+        <div class="ascii-divider" style="margin-top: 50px;">
+            ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ END OF TRANSMISSION ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+        </div>
+    </div>
+
+    <script>
+        // Grid Background
+        const canvas = document.getElementById('gridCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drawGrid();
+        }
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const gridSize = 50;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.strokeStyle = '#ff1744';
+            ctx.lineWidth = 1;
+            
+            // Vertical lines
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                const distFromCenter = Math.abs(x - centerX);
+                const opacity = Math.max(0, 1 - (distFromCenter / (canvas.width / 2)) * 1.5);
+                
+                ctx.globalAlpha = opacity * 0.3;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                const distFromCenter = Math.abs(y - centerY);
+                const opacity = Math.max(0, 1 - (distFromCenter / (canvas.height / 2)) * 1.5);
+                
+                ctx.globalAlpha = opacity * 0.3;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            ctx.globalAlpha = 1;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Terminal Typing Effect
+        const terminalText = document.getElementById('terminalText');
+        const intro = `INITIALIZING SYSTEM...
+LOADING MODULES...
+BOOTING SECURITY PROTOCOLS...
+ESTABLISHING CONNECTION...
+
+WELCOME TO THE MATRIX
+
+[PRESS ANY KEY TO CONTINUE]`;
+
+        let i = 0;
+        function typeWriter() {
+            if (i < intro.length) {
+                terminalText.innerHTML += intro.charAt(i);
+                i++;
+                setTimeout(typeWriter, 30);
+            } else {
+                setTimeout(() => {
+                    document.getElementById('terminalIntro').classList.remove('active');
+                    document.getElementById('mainContent').style.display = 'block';
+                }, 1000);
+            }
+        }
+
+        // Start typing after short delay
+        setTimeout(typeWriter, 500);
+
+        // Skip intro on key press
+        document.addEventListener('keydown', function() {
+            if (document.getElementById('terminalIntro').classList.contains('active')) {
+                document.getElementById('terminalIntro').classList.remove('active');
+                document.getElementById('mainContent').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
